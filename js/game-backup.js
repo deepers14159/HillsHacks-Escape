@@ -1,20 +1,17 @@
 var ctx;
 var playLoop;
 var fps = 30;
-var text_size = 100;
 var canvasH;
 var canvasW;
 var endgame = false;
 var endTimer = 1;
 var thatsIllegal = false;
-var wingame = false;
 
 var lastPlayerX;
 var lastPlayerY;
 var lastComX;
 var lastComY;
 var turnCount = 0;
-var machineDelay = -1;
 
 var boxes = [];
 
@@ -37,35 +34,39 @@ function Box(relativeX, relativeY) {
       lastComY = relativeY;
     }
     this.opacity = 0;
-    checkEndGame(); //Once a move has been made, check if game has been won or tied
+    checkEndGame(); //Once a move has been made, check if anyone has won
     return true;
   };
   this.draw = function() {
 
-    this.size = (canvasH-text_size)/5;
-    if(canvasW/5 < this.size) this.size = canvasW/5;
+    ctx.globalAlpha = 1;
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#0000FF";
+
+    this.size = canvasH/5;
+    if(canvasW/5 < this.size)
+      this.size = canvasW/5;
 
     this.actualX = (canvasW - this.size*5)/2 + (this.relativeX+2)*this.size;
-    this.actualY = ((canvasH-text_size) - this.size*5)/2 + (this.relativeY+2)*this.size;
+    this.actualY = (canvasH - this.size*5)/2 + (this.relativeY+2)*this.size;
+
+    //this.actualX = (this.relativeX + 4) * canvasW / 9;
+    //this.actualY = (this.relativeY + 2) * canvasW / 9;
 
     if(this.opacity < 1) this.opacity += 0.05;
     if (this.mark == 0) { //Draw an "O"
-      var scale = 0.75;
+      var scale = 0.8;
       ctx.beginPath();
       if (canvasW < 0) return;
       ctx.globalAlpha = this.opacity;
-      ctx.strokeStyle = "#FFFFFF";
-      ctx.lineWidth = this.opacity * 5;
       ctx.arc(this.actualX + this.size/2, this.actualY + this.size/2, this.size/2 * scale, 0, 2 * Math.PI);
       ctx.closePath();
       ctx.stroke();
       ctx.globalAlpha = 1;
     } else if (this.mark == 1) { //Draw an "X"
-      ctx.beginPath();
       var offset = 10;
+      ctx.beginPath();
       ctx.globalAlpha = this.opacity;
-      ctx.strokeStyle = "#192634";
-      ctx.lineWidth = this.opacity * 5;
       ctx.moveTo(this.actualX + offset, this.actualY + offset);
       ctx.lineTo(this.actualX + this.size - offset, this.actualY + this.size - offset);
       ctx.moveTo(this.actualX + this.size - offset, this.actualY + offset);
@@ -80,102 +81,45 @@ function Box(relativeX, relativeY) {
     ctx.beginPath();
     ctx.globalAlpha = 1;
     ctx.lineWidth = 3;
-    ctx.strokeStyle = "#3d5f80";
+    ctx.strokeStyle = "#0000FF";
     ctx.rect(this.actualX, this.actualY, this.size, this.size);
     ctx.closePath();
     ctx.stroke();
   };
 }
 
-function onTieGame() {
+function onDrawGame() {
   endgame = true;
   endTimer = 0;
 }
 
-function onWinGame() { //Temporary way to end the game
-  if (wingame) return;
-  wingame = true;
-  //endgame = true;
-  endTimer = -100;
-
-  log_push("&nbsp&nbsp", 0, 2);
-  log_push("I am beaten... Why did c0mrade forget to fix that stupid bug???", 0, 2);
-  log_push("Oh I know why! It's cause he was too busy planning that government hack! In fact, he mentioned that the password was |<span class = \"blink\"><b>getrichquick123</b></span>|@@@", 0, 2);
-
-  log_push("OOPS. I shoudn't have told you that...Good thing that password is encrypted... we take security seriously around here ya'know.", 0, 2);
-}
-
 function onClick(mouseX, mouseY) {
-  if (endgame || wingame) return;
-  if (machineDelay >= 0) return;
+  if (endgame) return;
 
-  var size = (canvasH-text_size)/5;
-  if(canvasW/5 < size) size = canvasW/5;
+  var size = canvasH/5;
+  if(canvasW/5 < size)
+    size = canvasW/5;
 
   var gridX = Math.floor((mouseX - (canvasW - size*5)/2)/size - 2);
-  var gridY = Math.floor((mouseY - ((canvasH-text_size) - size*5)/2)/size - 2);
+  var gridY = Math.floor((mouseY - (canvasH - size*5)/2)/size - 2);
 
+  console.log(gridX + " " + gridY);
   if (Math.abs(gridX) > 2 || Math.abs(gridY) > 2) return;
   if (Math.abs(gridX) == 2 || Math.abs(gridY) == 2) thatsIllegal = true;
   var arrayPosition = (gridX + 2) + (gridY + 2) * 5;
   if (boxes[arrayPosition].applyMark(0)) {
-    if (Math.abs(gridX) != 2 && Math.abs(gridY) != 2) {
-      machineDelay = 30;
-    }
+    machine.playMachine();
+    turnCount++;
   }
 }
 
 function checkEndGame() {
-  for (var y = 0; y < 5; y++) { //Check for all horizontal wins
-    for (var x = 0; x < 3; x++) {
-      for (var dx = 0; dx < 3; dx++) {
-        if (boxes[x + dx + y * 5].getMark() != 0) break;
-        if (dx == 2) {
-          onWinGame();
-          return true;
-        }
-      }
-    }
-  }
-  for (var x = 0; x < 5; x++) { //Check for all vertical wins
-    for (var y = 0; y < 3; y++) {
-      for (var dy = 0; dy < 3; dy++) {
-        if (boxes[x + (y + dy) * 5].getMark() != 0) break;
-        if (dy == 2) {
-          onWinGame();
-          return true;
-        }
-      }
-    }
-  }
-  for (var y = 0; y < 3; y++) { //Check for all left-right, up-down diagonal wins
-    for (var x = 0; x < 3; x++) {
-      for (var d = 0; d < 3; d++) {
-        if (boxes[(x + d) + (y + d) * 5].getMark() != 0) break;
-        if (d == 2) {
-          onWinGame();
-          return true;
-        }
-      }
-    }
-  }
-  for (var y = 0; y < 3; y++) { //Check for all right-left, up-down diagonal wins
-    for (var x = 2; x < 5; x++) {
-      for (var d = 0; d < 3; d++) {
-        if (boxes[(x - d) + (y + d) * 5].getMark() != 0) break;
-        if (d == 2) {
-          onWinGame();
-          return true;
-        }
-      }
-    }
-  }
   for (var x = 1; x < 4; x++) {
     for (var y = 1; y < 4; y++) {
       if(boxes[x + y * 5].getMark() == -1) return false;
     }
   }
-  onTieGame();
+  onDrawGame();
   return true;
 }
 
@@ -258,41 +202,22 @@ var machine = {
         }
       }
     }
-    //Protect against diagonal force plays by playing an edge
-    if (turnCount == 1) {
-      for (var y = -1; y <= 1; y++) {
-        for (var x = -1; x <= 1; x++) {
-          if (this.calcType(x, y) != 2) continue;
-          if (this.getBox(x, y).getMark() == 0) {
-            for (var y = -1; y <= 1; y++) {
-              for (var x = -1; x <= 1; x++) {
-                if (this.calcType(x, y) != 1) continue;
-                if (this.getBox(x, y).getMark() == -1 && this.getBox(-x, -y).getMark() == -1) {
-                  this.getBox(x, y).applyMark(1);
-                  return true;
-                }
+    //Protect against diagonal corners play by playing an edge
+    for (var c = -0.5; c <= 0.5; c++) {
+      if (this.getBox(-1, -1) == c - 0.5 && this.getBox(1, 1) == c - 0.5) {
+        if (this.getBox(1, -1) == -c - 0.5 && this.getBox(-1, 1) == -c - 0.5) {
+          for (var y = -1; y <= 1; y++) {
+            for (var x = -1; x <= 1; x++) {
+              if (this.calcType(x, y) != 1) continue;
+              if (this.getBox(x, y).getMark() == -1) {
+                this.getBox(x, y).applyMark(1);
+                return true;
               }
             }
           }
         }
       }
     }
-    // //Protect against diagonal corners play by playing an edge
-    // for (var c = -0.5; c <= 0.5; c++) {
-    //   if (this.getBox(-1, -1).getMark() == c - 0.5 && this.getBox(1, 1).getMark() == c - 0.5) {
-    //     if (this.getBox(1, -1).getMark() == -c - 0.5 && this.getBox(-1, 1).getMark() == -c - 0.5) {
-    //       for (var y = -1; y <= 1; y++) {
-    //         for (var x = -1; x <= 1; x++) {
-    //           if (this.calcType(x, y) != 1) continue;
-    //           if (this.getBox(x, y).getMark() == -1) {
-    //             this.getBox(x, y).applyMark(1);
-    //             return true;
-    //           }
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
     //Play in a corner if available
     for (var y = -1; y <= 1; y++) {
       for (var x = -1; x <= 1; x++) {
@@ -316,6 +241,7 @@ var machine = {
     return false;
   },
   playMachine : function() {
+    if (Math.abs(lastPlayerX) == 2 || Math.abs(lastPlayerY) == 2) return;
     if (turnCount == 0) {
       if (this.calcType(lastPlayerX, lastPlayerY) >= 1) { //Edge or Cornor
         this.getBox(0, 0).applyMark(1);
@@ -332,7 +258,7 @@ var machine = {
           this.playOffense();
         }
       } else {
-        onTieGame();
+        onDrawGame();
         return;
       }
     }
@@ -348,7 +274,6 @@ function play_game() {
   endgame = false;
   endTimer = 1;
   thatsIllegal = false;
-  wingame = false;
 
   turnCount = 0;
 
@@ -368,13 +293,6 @@ function play_game() {
 
 function draw(){
   reset();
-  if (machineDelay > 0) {
-    machineDelay--;
-  } else if (machineDelay == 0) {
-    machine.playMachine();
-    turnCount++;
-    machineDelay--
-  }
   if (endTimer < 1) endTimer += 0.012;
   if (endgame && endTimer > 0.5) {
     ctx.globalAlpha = endTimer * endTimer * endTimer * endTimer;
@@ -394,63 +312,14 @@ function draw(){
       ctx.fillStyle = "#000000";
       ctx.font = "30px Arial";
       text = "Wait... I thought I fixed that bug...";
-      ctx.fillText(text, canvasW / 2 - ctx.measureText(text).width / 2, canvasH - text_size/2);
-      //+ (text_size-ctx.measureText(text).height)/2
+      ctx.fillText(text, canvasW / 2 - ctx.measureText(text).width / 2, canvasH / 2);
     }
-    if (wingame) {
-      glitch1();
-      }
-    if (wingame) {
-      var canvasImg = new Image();
-      canvasImg.src = canvas.toDataURL();
-      ctx.drawImage(canvasImg, Math.random() * 2, Math.random() * 2);
-    }
-   }
-
-}
-function glitch1() {
-  var canvasImg = new Image();
-  canvasImg.src = canvas.toDataURL();
-
-  var sx;
-  var sy;
-  var sw;
-  var sh;
-  var glitchOffset = 30;
-  for (var y = 0; y < canvasH; y += 20) {
-    sx = canvasW * Math.random();
-    sy = y;
-    sw = canvasW * Math.random();
-    sh = Math.random() * 20;
-    //ctx.filter = "blur(2px)";
-    ctx.drawImage(canvasImg, sx, sy, sw, sh, (Math.random() - 0.5) * glitchOffset + sx, sy, sw, sh);
-    ctx.filter = "none";
-  }
-}
-
-
-function glitch2() {
-  var canvasImg = new Image();
-  canvasImg.src = canvas.toDataURL();
-
-  var sx;
-  var sy;
-  var sw;
-  var sh;
-  var glitchOffset = 30;
-  for (var i = 0; i < 30; i++) {
-    sx = canvasW * Math.random();
-    sy = canvasH * Math.random();
-    sw = canvasW * Math.random() / 10;
-    sh = canvasW * Math.random() / 10;
-    ctx.drawImage(canvasImg, sx, sy, sw, sh, (Math.random() - 0.5) * glitchOffset + sx, (Math.random() - 0.5) * glitchOffset + sy, sw, sh);
-    ctx.filter = "none";
   }
 }
 
 function reset() {
   ctx.globalAlpha = 1;
-  ctx.fillStyle = "#4b99b8";
+  ctx.fillStyle = "#00F000";
   ctx.fillRect(0, 0, canvasW, canvasH);
 }
 
@@ -463,7 +332,7 @@ function sizeAdjust() {
     document.documentElement.clientHeight ||
     document.body.clientHeight;
   canvasH *= 0.8;
-  canvasW *= 0.5;
+  canvasW *= 0.8;
   //console.log(canvasH);
   //console.log(canvasW);
   //document.getElementById("mycanvas").height = canvasH;
@@ -478,10 +347,23 @@ function sizeAdjust() {
     }
 }
 
+window.onload =
+  function Game() {
+    // sizeAdjust();
+    // document.body.style.marginTop = 0;
+    // document.body.style.marginLeft = 0;
+    // document.body.style.marginBottom = 0;
+    // document.body.style.marginUp = 0;
+    //
+    // this.ctx = document.getElementById("mycanvas").getContext("2d");
+    // play();
+  }
 document.onmousedown =
   function mousedown(e) {
     e = e || window.event;
     mouse = true;
+    if(!game.tictac)
+      return;
     if (!endgame) {
       xOffset = document.getElementById("mycanvas").getBoundingClientRect().x;
       yOffset = document.getElementById("mycanvas").getBoundingClientRect().y;

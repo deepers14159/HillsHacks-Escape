@@ -11,6 +11,8 @@ var interact = {isopen :  false, id : 0, stage : 0};
 
 var ctx;
 
+var testing = false;
+
 
 function update (){
 
@@ -241,11 +243,11 @@ function handle_interaction(input){
   else if(interact.id == 1){
 
     if(interact.stage == 0){
-      if(input.hashCode() == -85917635){
+      if(clean_input(input).hashCode() == 1253261399){
         interact.stage = 1;
         log_push("Authentication verified...@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", 0);
         log_push("Downloading secret files...@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", 0);
-        log_push("HOLD ON. @@@@@@@@@@@@@@@@@ This operation isn't cheap - is going to cost you some Bitcoin. Please send me your bank account number:", 0, 2);
+        log_push("HOLD ON. @@@@@@@@@@@@@@@@@ This operation isn't cheap - it's going to cost you $740,000. Please send me your bank account number:", 0, 2);
       }
       else {
         log_push("WRONG!!! You can't get past Babble Bot... the smartest AI security guard you'll ever meet!", 0, 2);
@@ -254,7 +256,7 @@ function handle_interaction(input){
     }
 
     else if(interact.stage == 1){
-      if(clean_input(input).hashCode() == 46792755){
+      if(clean_input(input).hashCode() == -2032403652){
         log_push("Processing payment...@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", 0);
         log_push("Downloading secret files...@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", 0);
         log_push("Files downloaded! <b>YOU WIN!</b>", 0);
@@ -296,7 +298,8 @@ function handle_interaction(input){
 
     else if(interact.stage == 2){
       if(clean_input(input) == "babblebot"){
-        log_push("You got them all! Heres a secret code: <b>CODE</b>@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", 0, 2);
+        log_push("You got them all! Heres a secret number: |<span class = \"blink\"><b>049</b></span>|@@@@@@@@@@@@@@@@@@@@@@", 0, 2);
+        log_push("I have no idea what it means... @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", 0, 2);
       }
       else {
         log_push("Not quite. Better luck next time!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", 0, 2);
@@ -356,19 +359,48 @@ function make_response(input){
 
 function bbrespond(input){
 
-  var special_text1 = "<a href=\"#\" id = \"hyperlink_video1\" data-toggle=\"modal\" onclick=\"openModal(1)\">video</a>"
+  //var special_text1 = "<a href=\"#\" id = \"hyperlink_video1\" data-toggle=\"modal\" onclick=\"openModal(1)\">video</a>"
   var special_text2 = "<a href=\"#\" id = \"hyperlink_video2\" data-toggle=\"modal\" onclick=\"openModal(2)\">play</a>"
   //var special_text = "<canvas id=\"myCanvas\" width=\"200\" height=\"100\" style=\"border:1px solid #000000;\"></canvas>"
-  var response = "Hi there. My name is Babble Bot and I am the AI in charge of guarding C0MRADE's personal computer. Check out this cool| " + special_text1 + "|!";
+  //var response = "Hi there. My name is Babble Bot and I am the AI in charge of guarding C0MRADE's personal computer. Check out this cool| " + special_text1 + "|!";
 
-  if(clean_input(input).includes("canweplaytic-tac-toe?"))
+  if(clean_input(input).includes("canweplaytictactoe")){
     log_push("Challenge accepted!"
     + " I love video games because they transport you into a different world...they "
     + "bring you beyond the bounds of your imagination! Let's |" + special_text2 + "|!", 0, 2);
-  else
-    log_push(response, 0, 2);
-  update_log();
+  }
+  else{
+    make_generic_response(input);
+  }
 
+  update_log();
+}
+
+function make_generic_response(input){
+  input = input.toLocaleLowerCase();
+  input = input.replace(/[<>,.?/!@#$%^&*-=+']/g, '');
+  input = input.split(" ");
+
+  var score = [];
+  var index_of_max = 0;
+  for(var i = 0; i < responses2.length; i++)
+  {
+      score[i] = 0;
+      var split_response = (responses2[i][0]).split(" ");
+      for(var j = 0; j < split_response.length; j++)
+      {
+        for(var k = 0; k < input.length; k++)
+        {
+          if(split_response[j] == input[k])
+            score[i]++;
+        }
+      }
+      score[i]/=split_response.length;
+      if(score[i] > score[index_of_max])
+        index_of_max = i;
+  }
+  console.log(score);
+  log_push(responses2[index_of_max][1], 0, 2);
 }
 
 function submit_userpass_form(){
@@ -376,32 +408,36 @@ function submit_userpass_form(){
   if(game.login == true)
     return;
 
-  // if($("#username")[0].value.hashCode() != -853093168){
-  //   $("#username")[0].value  = "";
-  //   $("#password")[0].value  = "";
-  //   alert("incorrect username or password :(");
-  //   return;
-  //   }
-  // if($("#password")[0].value.hashCode() != 1216985755){
-  //   $("#username")[0].value  = "";
-  //   $("#password")[0].value  = "";
-  //   alert("incorrect username or password :(");
-  //   return;
-  //   }
+  if(!testing){
+    if($("#username")[0].value.hashCode() != -853093168){
+      $("#username")[0].value  = "";
+      $("#password")[0].value  = "";
+      alert("incorrect username or password :(");
+      return;
+    }
+    if($("#password")[0].value.hashCode() != 1216985755){
+      $("#username")[0].value  = "";
+      $("#password")[0].value  = "";
+      alert("incorrect username or password :(");
+      return;
+    }
+  }
 
   $("#log_text_holder")[0].style.display = "block";
   $("#input_form")[0].style.display = "block";
   $("#userpass_form")[0].style.display = "none";
 
 
-  // log_push("Login Sucessful@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", 0);
-  // log_push("Running system startup...", 0);
-  // log_push("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@25% ... "
-  //           + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@50% ... "
-  //           + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@75% ... "
-  //           + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@99% ... "
-  //           + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@100%", 0);
-  // log_push("System ready. Type commands below", 0);
+  if(!testing){
+    log_push("Login Sucessful@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", 0);
+    log_push("Running system startup...", 0);
+    log_push("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@25% ... "
+              + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@50% ... "
+              + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@75% ... "
+              + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@99% ... "
+              + "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@100%", 0);
+    log_push("System ready. Type commands below", 0);
+  }
 
   game.login = true;
 }
@@ -482,6 +518,8 @@ String.prototype.hashCode = function() {
 
 window.onload = function(){
     //set the update loop
+    if(!testing)
+      interact.isopen = true;
     loop = setInterval(function() {update();} , 1000/fps);
 };
 
@@ -490,7 +528,7 @@ function getRandomInt(low, high){
 }
 
 function clean_input(input){
-  input = input.replace(/[@> ]/g, '');
+  input = input.replace(/[@>\-? ]/g, '');
   input = input.toLocaleLowerCase();
   return input;
 }
