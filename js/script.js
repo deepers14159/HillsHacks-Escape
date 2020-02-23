@@ -479,6 +479,7 @@ window.addEventListener('click', function closeModal(e) {
   }
   if (e.target == document.querySelector('#modal2')) {
     document.querySelector('#modal2').style.display = 'none';
+    game.tictac = false;
   }
 });
 
@@ -499,6 +500,7 @@ $(document).on('keydown', function(e) {
        if (e.key == "Escape") {
             document.querySelector('#modal1').style.display = 'none';
             document.querySelector('#modal2').style.display = 'none';
+            game.tictac = false;
        }
        if (e.key == "Enter") {
             submit_userpass_form();
