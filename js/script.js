@@ -369,6 +369,9 @@ function bbrespond(input){
     + " I love video games because they transport you into a different world...they "
     + "bring you beyond the bounds of your imagination! Let's |" + special_text2 + "|!", 0, 2);
   }
+  else if(clean_input(input).includes("getrichquick123")){
+    log_push("*GASP* How did you figure out the secret password? @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Don't be using that in the wrong places...", 0, 2);
+  }
   else{
     make_generic_response(input);
   }

@@ -100,7 +100,8 @@ function onWinGame() { //Temporary way to end the game
 
   log_push("&nbsp&nbsp", 0, 2);
   log_push("I am beaten... Why did c0mrade forget to fix that stupid bug???", 0, 2);
-  log_push("Oh I know why! It's cause he was too busy planning that government hack! In fact, he mentioned that the password was |<span class = \"blink\"><b>getrichquick123</b></span>|@@@", 0, 2);
+  //log_push("Oh I know why! It's cause he was too busy planning that government hack! In fact, he mentioned that the password was |<span class = \"blink\"><b>getrichquick123</b></span>|@@@", 0, 2);
+  log_push("Oh I know why! He was too busy planning that government hack! In fact, he mentioned that the password was |<span class = \"blink\"><b>twmnxs6yfxs7hjb</b></span>|@@@", 0, 2);
 
   log_push("OOPS. I shoudn't have told you that...Good thing that password is encrypted... we take security seriously around here ya'know.", 0, 2);
 }
